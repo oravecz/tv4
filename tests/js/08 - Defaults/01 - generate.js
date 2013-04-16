@@ -26,134 +26,15 @@ describe( 'JsonSchema can generate default data structures based on schema value
     } );
 
     describe( 'If no instance is yet created', function () {
-        it( 'will create a new object if one does not yet exist', function () {
+        it( 'cannot set required properties on root object', function () {
             var schema = {
                 type : 'object',
                 default : {}
             };
             var obj = js.generate( schema );
-            expect( obj ).toEqual( {} );
+            expect( obj ).toEqual( null );
         } );
 
-        it( 'will create a primitive type', function () {
-            var schema = {
-                type : 'number',
-                default : 5
-            };
-            var obj = js.generate( schema );
-            expect( obj ).toEqual( 5 );
-        } );
-
-        it( 'will create a nested structure with properties', function () {
-            var schema = {
-                type : 'object',
-                properties : {
-                    child : {
-                        type : 'number',
-                        default : 6
-                    }
-                },
-                default : {}
-            };
-            var obj = js.generate( schema );
-            expect( obj ).toEqual( { child : 6 } );
-        } );
-
-        it( 'will create a nested structure with additional properties', function () {
-            var schema = {
-                type : 'object',
-                additionalProperties : {
-                    child : {
-                        type : 'boolean',
-                        default : true
-                    }
-                },
-                default : {}
-            };
-            var obj = js.generate( schema );
-            expect( obj ).toEqual( { child : true } );
-        } );
-
-        it( 'will create a nested structure with both properties and additional properties', function () {
-            var schema = {
-                type : 'object',
-                properties : {
-                    child : {
-                        type : 'boolean',
-                        default : true
-                    }
-                },
-                additionalProperties : {
-                    sibling : {
-                        type : 'integer',
-                        default : 5
-                    }
-                },
-                default : {}
-            };
-            var obj = js.generate( schema );
-            expect( obj ).toEqual( { child : true, sibling : 5 } );
-        } );
-
-        it( 'will create an array structure', function () {
-            var schema = {
-                type : 'array',
-                default : []
-            };
-            var obj = js.generate( schema );
-            expect( obj ).toEqual( [] );
-        } );
-
-        it( 'will create a array structure with some elements', function () {
-            var schema = {
-                type : 'array',
-                default : [
-                    {},
-                    {}
-                ],
-                additionalItems : {
-                    type: 'object',
-                    properties: {
-                        name : {
-                            type : 'string',
-                            default : 'fred'
-                        }
-                    }
-                }
-            };
-            var obj = js.generate( schema );
-            expect( obj ).toEqual( [
-                {name : 'fred'},
-                {name : 'fred'}
-            ] );
-        } );
-
-        it( 'will create a nested structure at various levels of nesting', function () {
-            var schema = {
-                type : 'object',
-                default : {},
-                properties : {
-                    child : {
-                        type : 'object',
-                        default : {},
-                        properties : {
-                            grandchild : {
-                                type : 'object',
-                                default : {},
-                                properties : {
-                                    'greatgrandchild' : {
-                                        type : 'string',
-                                        default : 'kathy'
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            };
-            var obj = js.generate( schema );
-            expect( obj ).toEqual( { child : {grandchild : {greatgrandchild : 'kathy'}} } );
-        } );
     } );
 
     describe( 'If an existing instance already exists', function () {
@@ -167,9 +48,24 @@ describe( 'JsonSchema can generate default data structures based on schema value
             expect( obj ).toEqual( {} );
         } );
 
+        it( 'will not append values if required is not present', function () {
+            var schema = {
+                type : 'object',
+                properties : {
+                    child : {
+                        type : 'number',
+                        default : 6
+                    }
+                }
+            };
+            var obj = js.generate( {}, schema );
+            expect( obj ).toEqual( {} );
+        } );
+
         it( 'will append values to the current instance', function () {
             var schema = {
                 type : 'object',
+                required: ['child'],
                 properties : {
                     child : {
                         type : 'number',
@@ -189,6 +85,7 @@ describe( 'JsonSchema can generate default data structures based on schema value
                         type : 'array',
                         items : {
                             type : 'object',
+                            required: ['status'],
                             properties : {
                                 name : {
                                     type : 'string'
@@ -212,18 +109,20 @@ describe( 'JsonSchema can generate default data structures based on schema value
             ]} );
         } );
 
-        it( 'will not modify the original instance', function () {
+        it( 'will create nested structure without modifying the original instance', function () {
             var schema = {
                 type : 'object',
-                default : {},
+                required: ['child'],
                 properties : {
                     child : {
                         type : 'object',
                         default : {},
+                        required: ['grandchild'],
                         properties : {
                             grandchild : {
                                 type : 'object',
                                 default : {},
+                                required: ['greatgrandchild'],
                                 properties : {
                                     'greatgrandchild' : {
                                         type : 'string',
@@ -235,8 +134,11 @@ describe( 'JsonSchema can generate default data structures based on schema value
                     }
                 }
             };
+            var obj = js.generate( {}, schema );
+            expect( obj ).toEqual( { child : { grandchild : { greatgrandchild : 'kathy'} } } );
+
             var instance = { gold : 1751.23, child : { grandchild : { age : 23}}};
-            var obj = js.generate( instance, schema );
+            obj = js.generate( instance, schema );
             expect( obj ).toEqual( { gold : 1751.23, child : { grandchild : { age : 23, greatgrandchild : 'kathy'} } } );
             expect( instance ).toEqual( { gold : 1751.23, child : { grandchild : { age : 23}}} );
         } );
@@ -262,7 +164,7 @@ describe( 'JsonSchema can generate default data structures based on schema value
                 { name : 'fred' },
                 { name : 'barney' }
             ]};
-            var obj = js.generate( instance, schema );
+            js.generate( instance, schema );
             expect( instance ).toEqual( { child : [
                 { name : 'fred' },
                 { name : 'barney' }
