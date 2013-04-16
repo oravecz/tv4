@@ -20,6 +20,13 @@
     </description>
     <inceptionYear>2013</inceptionYear>
 
+    <developers>
+        <developer>
+            <name>James Cook</name>
+            <email>jcook@pykl.com</email>
+        </developer>
+    </developers>
+
     <licenses>
         <license>
             <name>Proprietary License</name>
@@ -37,13 +44,7 @@
     </organization>
 
     <properties>
-        <spring-version>3.1.1.RELEASE</spring-version>
-        <slf4j-version>1.6.4</slf4j-version>
-        <log4j-version>1.2.16</log4j-version>
-        <aws-version>1.2.2</aws-version>
         <ringojs-version>0.9.0-alpha-5</ringojs-version>
-        <elasticsearch-version>0.19.2</elasticsearch-version>
-        <hazelcast-version>2.0.3</hazelcast-version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
     </properties>
@@ -106,8 +107,11 @@
                         <include>**/*.java</include>
                         <include>LICENSE.txt</include>
                     </includes>
+                    <excludes>
+                        <exclude>karma.conf.js</exclude>
+                    </excludes>
                     <strictCheck>true</strictCheck>
-                    <header>http://repo.pykl.com/license.txt</header>
+                    <header>http://repo.pykl.org/license_mit.txt</header>
                     <properties>
                         <year>${project.inceptionYear}</year>
                     </properties>
@@ -115,27 +119,22 @@
             </plugin>
 
             <plugin>
-                <artifactId>maven-antrun-plugin</artifactId>
-                <version>1.6</version>
+                <groupId>com.kelveden</groupId>
+                <artifactId>maven-karma-plugin</artifactId>
+                <version>1.0</version>
                 <executions>
                     <execution>
-                        <phase>test</phase>
-                        <configuration>
-                            <target unless="maven.test.skip">
-                                <java classname="org.ringojs.tools.launcher.Main" fork="true" failonerror="yes">
-                                    <jvmarg value="-Dringo.home=lib" />
-                                    <jvmarg value="-Dringo.classpath=" />
-                                    <jvmarg value="-Dringo.verbose=true" />
-                                    <arg value="${basedir}/src/test/js/integration.js" />
-                                    <classpath refid="maven.test.classpath" />
-                                </java>
-                            </target>
-                        </configuration>
                         <goals>
-                            <goal>run</goal>
+                            <goal>start</goal>
                         </goals>
                     </execution>
                 </executions>
+                <configuration>
+                    <browsers>Chrome</browsers>
+                    <autoWatch>false</autoWatch>
+                    <singleRun>true</singleRun>
+                    <reporters>junit</reporters>
+                </configuration>
             </plugin>
 
         </plugins>
