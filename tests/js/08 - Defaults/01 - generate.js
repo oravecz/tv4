@@ -146,29 +146,76 @@ describe( 'JsonSchema can generate default data structures based on schema value
         it( 'will not modify the original instance with an array', function () {
             var schema = {
                 type : 'object',
-                default : {},
                 properties : {
                     child : {
                         type : 'array',
-                        default : {},
-                        properties : {
-                            amount : {
-                                type : 'number',
-                                default : 0.00
-                            }
-                        }
+                        default : []
                     }
-                }
+                },
+                required: ['child']
             };
-            var instance = { child : [
-                { name : 'fred' },
-                { name : 'barney' }
-            ]};
-            js.generate( instance, schema );
-            expect( instance ).toEqual( { child : [
-                { name : 'fred' },
-                { name : 'barney' }
-            ]} );
+            var instance = {};
+            var result = js.generate( instance, schema );
+            expect( result ).toEqual( { child: [ ] } );
+            expect( instance ).toEqual( {} );
+        } );
+
+        it( 'will handle nested property sets', function () {
+            var schema = {
+                type: 'object',
+                properties: {
+                    id: {
+                        type: 'string'
+                    },
+                    password: {
+                        type: 'string'
+                    },
+                    services: {
+                        type: 'object',
+                        properties: {
+                            stripe: {
+                                type: 'string'
+                            },
+                            xero: {
+                                type: 'string'
+                            }
+                        },
+                        additionalProperties: false
+                    },
+                    email: {
+                        type: 'object',
+                        properties: {
+                            status: {
+                                type: 'string',
+                                'enum': ['candidate','verified'],
+                                'default': 'candidate'
+                            },
+                            address: {
+                                type: 'string',
+                                format: 'email'
+                            }
+                        },
+                        required: ['status', 'address'],
+                        'default': {},
+                        additionalProperties: false
+                    },
+                    created: {
+                        type: 'string',
+                        format: 'date-time'
+                    }
+                },
+                additionalProperties: false,
+                required: ['id', 'email']
+            };
+            var instance = { id: '123'};
+            var result = js.generate( instance, schema );
+
+            expect( result ).toEqual( {
+                id: '123',
+                email: {
+                    status: 'candidate'
+                }
+            } );
         } );
     } );
 } );
