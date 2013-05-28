@@ -28,6 +28,7 @@ describe( 'JsonSchema will validate the property name and type of an instance an
     it( 'will accept properties with the correct types', function () {
         var data = {intKey: 1, stringKey: "one"};
         var schema = {
+            type: 'object',
             properties: {
                 intKey: {"type": "integer"},
                 stringKey: {"type": "string"}
@@ -40,6 +41,7 @@ describe( 'JsonSchema will validate the property name and type of an instance an
     it( 'will reject properties with incorrect types', function () {
         var data = {intKey: 1, stringKey: true};
         var schema = {
+            type: 'object',
             properties: {
                 intKey: {"type": "integer"},
                 stringKey: {"type": "string"}
