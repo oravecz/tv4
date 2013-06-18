@@ -225,14 +225,19 @@ describe( 'JsonSchema can generate default data structures based on schema value
                     totalCharged : {
                         type : 'number',
                         'default': 0
+                    },
+                    checkForFalse : {
+                        type: 'boolean',
+                        'default': false
                     }
                 },
-                required: [ 'totalCharged' ]
+                required: [ 'totalCharged', 'checkForFalse' ]
             };
             var instance = {};
             var result = js.generate( instance, schema );
 
             expect( result.totalCharged ).toEqual( 0 );
+            expect( result.checkForFalse ).toEqual( false );
         } );
 
     } );
