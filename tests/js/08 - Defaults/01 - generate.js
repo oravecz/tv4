@@ -217,5 +217,28 @@ describe( 'JsonSchema can generate default data structures based on schema value
                 }
             } );
         } );
+
+        it( 'A particular case where totalCharged is not defaulted because it was 0', function () {
+            var schema = {
+                type : 'object',
+                properties : {
+                    totalCharged : {
+                        type : 'number',
+                        'default': 0
+                    },
+                    checkForFalse : {
+                        type: 'boolean',
+                        'default': false
+                    }
+                },
+                required: [ 'totalCharged', 'checkForFalse' ]
+            };
+            var instance = {};
+            var result = js.generate( instance, schema );
+
+            expect( result.totalCharged ).toEqual( 0 );
+            expect( result.checkForFalse ).toEqual( false );
+        } );
+
     } );
 } );
