@@ -38,4 +38,36 @@ describe( 'JsonSchema will validate required properties on an instance and', fun
         var result = js.validate( data, schema );
         expect( result.valid ).not.toBe( true );
     } );
+
+    it( 'will properly handle properties that evaluate to false (ie 0, false)', function () {
+        var data = {key1 : 1, key2 : 0, key3 : false};
+        var schema = {required : ["key1", "key2", "key3"]};
+        var result = js.validate( data, schema );
+        expect( result.valid ).toBe( true );
+    } );
+
+    it( 'will properly handle default properties that evaluate to false (ie 0, false)', function () {
+        var schema = {
+            type: 'object',
+            properties: {
+                key1: {
+                    type: 'number',
+                    'default': 0
+                },
+                key2: {
+                    type: 'boolean',
+                    'default': false
+                },
+                key3: {
+                    type: 'string',
+                    'default': ''
+                }
+            },
+            required: ['key1', 'key2', 'key3']
+        };
+        var instance = js.generate( {}, schema );
+        console.log( JSON.stringify( instance ) );
+        var result = js.validate( instance, schema );
+        expect( result.valid ).toBe( true );
+    } );
 } );
